@@ -13,18 +13,19 @@ const io = new Server(server, {
   }
 });
 
-const ROOT = __dirname;
+// ✅ 用 process.cwd()（Render 标准路径）
+const ROOT = process.cwd();
 
-// 静态资源
+// 静态文件
 app.use(express.static(ROOT));
 app.use("/undercover-online", express.static(path.join(ROOT, "undercover-online")));
 
-// 直接给首页一个跳转，避免 /
+// 首页直接跳游戏
 app.get("/", (req, res) => {
   res.redirect("/undercover-online/");
 });
 
-// 明确返回 undercover-online/index.html
+// 强制返回 index.html
 app.get("/undercover-online", (req, res) => {
   res.sendFile(path.join(ROOT, "undercover-online", "index.html"));
 });
@@ -33,6 +34,7 @@ app.get("/undercover-online/", (req, res) => {
   res.sendFile(path.join(ROOT, "undercover-online", "index.html"));
 });
 
+// socket 房间
 let rooms = {};
 
 io.on("connection", (socket) => {
