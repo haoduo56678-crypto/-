@@ -5,12 +5,24 @@ const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-// 👉 静态文件（让 /undercover-online 能访问）
+// ✅ 已经包含你刚刚说的那一行修改（CORS）
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+// 静态资源
 app.use(express.static(path.join(__dirname)));
 
-// 👉 简单房间逻辑（最基础联机）
+// 首页（防 Render 挂）
+app.get("/", (req, res) => {
+  res.send("Undercover server running");
+});
+
+// 房间逻辑
 let rooms = {};
 
 io.on("connection", (socket) => {
@@ -36,7 +48,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// 👉 Railway 必须用这个端口
+// Render 端口
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
