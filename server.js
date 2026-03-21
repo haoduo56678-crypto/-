@@ -6,7 +6,6 @@ const path = require("path");
 const app = express();
 const server = http.createServer(app);
 
-// ✅ 已经包含你刚刚说的那一行修改（CORS）
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -14,15 +13,26 @@ const io = new Server(server, {
   }
 });
 
-// 静态资源
-app.use(express.static(path.join(__dirname)));
+const ROOT = __dirname;
 
-// 首页（防 Render 挂）
+// 静态资源
+app.use(express.static(ROOT));
+app.use("/undercover-online", express.static(path.join(ROOT, "undercover-online")));
+
+// 直接给首页一个跳转，避免 /
 app.get("/", (req, res) => {
-  res.send("Undercover server running");
+  res.redirect("/undercover-online/");
 });
 
-// 房间逻辑
+// 明确返回 undercover-online/index.html
+app.get("/undercover-online", (req, res) => {
+  res.sendFile(path.join(ROOT, "undercover-online", "index.html"));
+});
+
+app.get("/undercover-online/", (req, res) => {
+  res.sendFile(path.join(ROOT, "undercover-online", "index.html"));
+});
+
 let rooms = {};
 
 io.on("connection", (socket) => {
@@ -35,20 +45,21 @@ io.on("connection", (socket) => {
       rooms[roomId] = [];
     }
 
-    rooms[roomId].push(socket.id);
+    if (!rooms[roomId].includes(socket.id)) {
+      rooms[roomId].push(socket.id);
+    }
 
     io.to(roomId).emit("updatePlayers", rooms[roomId]);
   });
 
   socket.on("disconnect", () => {
-    for (let roomId in rooms) {
+    for (const roomId in rooms) {
       rooms[roomId] = rooms[roomId].filter((id) => id !== socket.id);
       io.to(roomId).emit("updatePlayers", rooms[roomId]);
     }
   });
 });
 
-// Render 端口
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
