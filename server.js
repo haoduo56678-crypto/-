@@ -13,28 +13,28 @@ const io = new Server(server, {
   }
 });
 
-// ✅ 用 process.cwd()（Render 标准路径）
-const ROOT = process.cwd();
+const ROOT = __dirname;
+const GAME_DIR = path.join(ROOT, "undercover-online");
 
-// 静态文件
-app.use(express.static(ROOT));
-app.use("/undercover-online", express.static(path.join(ROOT, "undercover-online")));
+// 先单独托管游戏目录里的静态资源
+app.use("/undercover-online", express.static(GAME_DIR));
 
-// 首页直接跳游戏
+// 根路径直接跳到游戏
 app.get("/", (req, res) => {
   res.redirect("/undercover-online/");
 });
 
-// 强制返回 index.html
-app.get("/undercover-online", (req, res) => {
-  res.sendFile(path.join(ROOT, "undercover-online", "index.html"));
+// 明确返回游戏首页
+app.get(["/undercover-online", "/undercover-online/"], (req, res) => {
+  res.sendFile(path.join(GAME_DIR, "index.html"));
 });
 
-app.get("/undercover-online/", (req, res) => {
-  res.sendFile(path.join(ROOT, "undercover-online", "index.html"));
+// 兜底：任何没匹配到的 undercover-online 路径也回首页
+app.get("/undercover-online/*", (req, res) => {
+  res.sendFile(path.join(GAME_DIR, "index.html"));
 });
 
-// socket 房间
+// ===== socket =====
 let rooms = {};
 
 io.on("connection", (socket) => {
