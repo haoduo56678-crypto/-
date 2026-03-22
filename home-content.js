@@ -10,7 +10,7 @@
     { name: 'Snake', link: 'snake/index.html' },
     { name: 'Minesweeper', link: 'minesweeper/index.html' },
     { name: 'Chess', link: 'chess/index.html' },
-    { name: '谁是卧底（联机版）', link: 'undercover-fast/index.html' },
+    { name: 'Undercover (Online)', link: 'undercover-fast/index.html' }
   ];
 
   function renderGameLinks() {
@@ -19,7 +19,7 @@
       const gameLink = document.createElement('a');
       gameLink.href = game.link;
       gameLink.className = 'card';
-      gameLink.innerHTML = `<h3>${game.name}</h3><p>进入${game.name}游戏</p>`;
+      gameLink.innerHTML = `<h3>${game.name}</h3><p>Play ${game.name}</p>`;
       gamesContainer.appendChild(gameLink);
     });
   }
